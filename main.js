@@ -65,6 +65,7 @@ Parse.Cloud.define("getPoi", async(request) => {
             images: existingPoi.get("images"),
             type: existingPoi.get("type"),
             mail: existingPoi.get("mail"),
+            parentName: region.get("name")
         }
     }
 });
