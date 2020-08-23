@@ -161,3 +161,18 @@ Parse.Cloud.define("getRegion", async(request) => {
         response.restaurants = restaurants;
     return { code: 200, response: response };
 });
+
+Parse.Cloud.define("updateRegion", async(request) => {
+    const user = request.user;
+    if (user === undefined)
+        return { code: 403, error: "Unauthorized user" };
+
+    const query = new Parse.Query("Region");
+    query.equalTo('url', request.params.region);
+    const region = await query.first({ useMasterKey: true });
+    if (region === undefined)
+        return { code: 404, error: "Region not found" };
+
+    await region.save(request.params.data, { useMasterKey: true });
+    return { code: 200 };
+});
