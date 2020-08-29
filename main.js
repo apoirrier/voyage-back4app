@@ -176,3 +176,46 @@ Parse.Cloud.define("updateRegion", async(request) => {
     await region.save(request.params.data, { useMasterKey: true });
     return { code: 200 };
 });
+
+Parse.Cloud.define("listRegion", async(request) => {
+    const query = new Parse.Query("Region");
+    const regions = await query.find({ useMasterKey: true });
+    const answer = [];
+    for (let i = 0; i < regions.length; i++) {
+        answer.push({
+            url: regions[i].get("url"),
+            name: regions[i].get("name"),
+            coordinates: regions[i].get("coordinates")
+        });
+        if (regions[i].get("images").length > 0)
+            answer[answer.length - 1].image = regions[i].get("images")[0];
+    }
+    return { code: 200, regions: answer };
+});
+
+Parse.Cloud.define("createRegion", async(request) => {
+    const user = request.user;
+    if (user === undefined)
+        return { code: 403, error: "Unauthorized user" };
+
+    const regionId = request.params.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(' ').join('-').toLowerCase();
+
+    const query = new Parse.Query("Region");
+    query.equalTo('url', regionId);
+    const existingRegion = await query.first({ useMasterKey: true });
+    if (existingRegion !== undefined)
+        return { code: 400, error: "Another region with same generated url already exists" };
+
+    const Region = Parse.Object.extend("Region");
+    const region = new Region();
+
+    region.set("url", regionId);
+    region.set("name", request.params.name);
+    region.set("generalTabs", []);
+    region.set("images", []);
+    region.set("description", "");
+
+    await region.save(null, { useMasterKey: true });
+
+    return { code: 200 };
+});
