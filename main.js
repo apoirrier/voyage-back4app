@@ -214,6 +214,7 @@ Parse.Cloud.define("createRegion", async(request) => {
     region.set("generalTabs", []);
     region.set("images", []);
     region.set("description", "");
+    region.set("coordinates", request.params.coordinates);
 
     await region.save(null, { useMasterKey: true });
 
