@@ -134,7 +134,8 @@ Parse.Cloud.define("getRegion", async(request) => {
     let hotels = [];
     let activities = [];
     const queryPois = region.relation("pois").query();
-    const allPois = await queryPois.find();
+    queryPois.limit(1000);
+    const allPois = await queryPois.find({ useMasterKey: true }));
 
     for (let i = 0; i < allPois.length; i++) {
         const shortPoi = {
